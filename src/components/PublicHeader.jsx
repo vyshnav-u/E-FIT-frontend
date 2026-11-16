@@ -7,8 +7,8 @@ function PublicHeader() {
 
   const navLinks = [
     { name: "HOME", path: "/" },
-    { name: "ABOUT", path: "/about" },
-    { name: "CONTACT", path: "/contact" },
+    { name: "ABOUT", path: "" },
+    { name: "CONTACT", path: "" },
   ];
 
   return (
