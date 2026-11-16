@@ -160,3 +160,108 @@ export const getUserWorkoutsAPI = async (token) => {
         }
     });
 };
+export const getUserExercisesAPI = async (token) => {
+    return await api.get("/exercises", {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+};
+
+export const createCustomWorkoutAPI = async (data, token) => {
+    return await api.post("/workouts/custom", data, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+};
+
+export const getUserDietAPI = async (token) => {
+    return await api.get("/diet", {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+};
+
+
+
+export const getDailyMealLogsAPI = async (date, token) => {
+    return await api.get(`/diet/logs?date=${date}`, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+};
+
+export const createMealLogAPI = async (data, token) => {
+    return await api.post("/diet/logs", data, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+};
+
+export const activateWorkoutAPI = async (data, token) => {
+    return await api.post("/workouts/activate", data, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+};
+
+export const getActiveWorkoutAPI = async (token) => {
+    return await api.get("/workouts/active", {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+};
+
+export const saveWorkoutProgressAPI = async (data, token) => {
+    return await api.post("/workouts/progress", data, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+};
+
+export const getWorkoutHistoryAPI = async (token) => {
+    return await api.get("/workouts/history", {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+};
+
+export const getWeightAPI = async (token) => {
+    return await api.get("/weight", {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+};
+
+export const addWeightAPI = async (data, token) => {
+    return await api.post("/weight", data, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+};
+
+export const setWeightGoalAPI = async (data, token) => {
+    return await api.put("/weight/goal", data, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+};
+
+export const uploadProfileImageAPI = async (formData, token) => {
+    return await api.put("/profile/image", formData, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+};

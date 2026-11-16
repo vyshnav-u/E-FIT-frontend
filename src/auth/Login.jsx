@@ -109,7 +109,7 @@ function Login() {
             </div>
 
             <div className="flex justify-end">
-              <Link to="/forgot-password" className="text-xs text-gray-400 hover:text-[#DFF500]">
+              <Link to="" className="text-xs text-gray-400 hover:text-[#DFF500]">
                 Forgot password?
               </Link>
             </div>
@@ -121,7 +121,7 @@ function Login() {
               Login ↗
             </button>
           </form>
-          <pre>{JSON.stringify(formData, null, 2)}</pre>
+     
 
           <p className="mt-6 text-center text-sm text-gray-400">
             Don't have an account?{" "}

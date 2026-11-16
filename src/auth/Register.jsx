@@ -154,7 +154,7 @@ function Register() {
               Create account ↗
             </button>
           </form>
-          <pre>{JSON.stringify(formData, null, 2)}</pre>
+       
 
           <p className="mt-6 text-center text-sm text-gray-400">
             Already have an account?{" "}

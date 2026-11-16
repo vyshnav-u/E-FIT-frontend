@@ -1,10 +1,26 @@
+
 import React from "react";
-import { FaDumbbell, FaUserShield, FaBell } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+import {
+  FaDumbbell,
+  FaUserShield,
+  FaBell,
+  FaSignOutAlt
+} from "react-icons/fa";
 
 function AdminHeader() {
+
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    navigate("/login");
+  };
+
   return (
     <header className="sticky top-0 z-40 border-b border-white/10 bg-[#080908]/95 px-5 py-4 backdrop-blur-md sm:px-8 lg:px-10">
       <div className="flex items-center justify-between">
+
         <div className="flex items-center gap-3">
           <FaDumbbell className="text-xl text-[#DFF500]" />
           <h1 className="text-xl font-black tracking-[0.2em]">
@@ -16,6 +32,7 @@ function AdminHeader() {
         </div>
 
         <div className="flex items-center gap-5">
+
           <button
             type="button"
             className="text-gray-400 transition hover:text-[#DFF500]"
@@ -28,11 +45,22 @@ function AdminHeader() {
             <div className="flex h-9 w-9 items-center justify-center rounded-full border border-[#DFF500]/50 text-[#DFF500]">
               <FaUserShield />
             </div>
+
             <div className="hidden sm:block">
               <p className="text-sm font-semibold">Administrator</p>
               <p className="text-xs text-gray-500">System Admin</p>
             </div>
           </div>
+
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="flex items-center gap-2 text-sm text-gray-400 transition hover:text-[#DFF500]"
+          >
+            <FaSignOutAlt />
+            <span>Logout</span>
+          </button>
+
         </div>
       </div>
     </header>

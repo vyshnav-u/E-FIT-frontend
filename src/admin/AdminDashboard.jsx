@@ -1,108 +1,196 @@
-import React from "react";
+
+import React, { useEffect, useState } from "react";
 import AdminHeader from "../components/AdminHeader";
 import AdminSidebar from "../components/AdminSidebar";
 import {
   FaUsers,
-  FaUserTie,
   FaDumbbell,
-  FaUserCheck,
-  FaArrowUp,
+  FaUtensils,
   FaCalendarAlt,
-  FaClock,
+  FaArrowUp,
 } from "react-icons/fa";
 
+import {
+  getAllUsersAPI,
+  getWorkoutsAPI,
+  getDietAPI,
+} from "../services/authservice";
+
 function AdminDashboard() {
+
+  const [users, setUsers] = useState([]);
+  const [workouts, setWorkouts] = useState([]);
+  const [diets, setDiets] = useState([]);
+
+  const [loading, setLoading] = useState(true);
+  const [errors, setErrors] = useState([]);
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+          setErrors(["Please log in to view the dashboard."]);
+          return;
+        }
+
+        const results = await Promise.allSettled([
+          getAllUsersAPI(token),
+          getWorkoutsAPI(token),
+          getDietAPI(token),
+        ]);
+
+        const failedRequests = [];
+
+        if (results[0].status === "fulfilled") {
+          setUsers(results[0].value.data.users || []);
+        } else {
+          failedRequests.push("Unable to fetch users.");
+        }
+
+        if (results[1].status === "fulfilled") {
+          setWorkouts(results[1].value.data.workouts || []);
+        } else {
+          failedRequests.push("Unable to fetch workout plans.");
+        }
+
+        if (results[2].status === "fulfilled") {
+          setDiets(results[2].value.data.diets || []);
+        } else {
+          failedRequests.push("Unable to fetch diet plans.");
+        }
+
+        setErrors(failedRequests);
+
+      } catch (error) {
+        console.error("Dashboard error:", error);
+        setErrors(["Something went wrong while loading dashboard data."]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
+
+  const registeredUsers = users.filter(
+    (user) => user.role !== "admin"
+  );
+
+  const recentUsers = [...registeredUsers].sort((a, b) => {
+    const dateA = a.createdAt
+      ? new Date(a.createdAt).getTime()
+      : parseInt(a._id.substring(0, 8), 16) * 1000;
+
+    const dateB = b.createdAt
+      ? new Date(b.createdAt).getTime()
+      : parseInt(b._id.substring(0, 8), 16) * 1000;
+
+    return dateB - dateA;
+  }).slice(0, 5);
+
+  const formatDate = (user) => {
+    const date = user.createdAt
+      ? new Date(user.createdAt)
+      : new Date(parseInt(user._id.substring(0, 8), 16) * 1000);
+
+    if (isNaN(date.getTime())) {
+      return "Date unavailable";
+    }
+
+    return date.toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  };
+
   const stats = [
     {
-      title: "Total Members",
-      value: "248",
-      change: "+12 this month",
+      title: "Registered Users",
+      value: registeredUsers.length,
+      description: "Total member accounts",
       icon: FaUsers,
     },
     {
-      title: "Total Trainers",
-      value: "18",
-      change: "+3 this month",
-      icon: FaUserTie,
-    },
-    {
-      title: "Total Workouts",
-      value: "36",
-      change: "8 active programs",
+      title: "Workout Plans",
+      value: workouts.length,
+      description: "Available workout programs",
       icon: FaDumbbell,
     },
     {
-      title: "Registered Users",
-      value: "284",
-      change: "+15 this month",
-      icon: FaUserCheck,
+      title: "Diet Plans",
+      value: diets.length,
+      description: "Available nutrition programs",
+      icon: FaUtensils,
     },
   ];
 
-  const recentMembers = [
-    { name: "Arjun Menon", email: "arjun@gmail.com", date: "30 Oct 2026" },
-    { name: "Rahul Krishna", email: "rahul@gmail.com", date: "29 Oct 2026" },
-    { name: "Adithya Raj", email: "adithya@gmail.com", date: "28 Oct 2026" },
-    { name: "Nikhil Das", email: "nikhil@gmail.com", date: "27 Oct 2026" },
-  ];
-
-  const schedules = [
-    {
-      trainer: "Alex Morgan",
-      member: "Arjun Menon",
-      workout: "Strength Training",
-      time: "09:00 AM",
-    },
-    {
-      trainer: "David James",
-      member: "Rahul Krishna",
-      workout: "Cardio Training",
-      time: "11:00 AM",
-    },
-    {
-      trainer: "John Mathew",
-      member: "Adithya Raj",
-      workout: "Full Body Workout",
-      time: "02:00 PM",
-    },
-  ];
+  const currentDate = new Date().toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
 
   return (
     <div className="min-h-screen bg-[#080908] text-[#EBEDE3]">
+
       <AdminHeader />
 
       <div className="lg:flex">
+
         <AdminSidebar />
 
         <main className="min-w-0 flex-1 px-5 py-8 sm:px-8 lg:px-10">
-          <div className="mb-10 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+
+          <div className="mb-12 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+
             <div>
               <p className="mb-3 text-xs font-semibold tracking-[0.3em] text-[#DFF500]">
                 OVERVIEW
               </p>
+
               <h1 className="text-3xl font-bold sm:text-4xl">
                 Admin Dashboard
               </h1>
+
               <p className="mt-3 text-sm text-gray-500">
-                Monitor and manage your fitness training application.
+                Manage users, workouts and nutrition programs.
               </p>
             </div>
 
             <p className="text-xs text-gray-500">
               <FaCalendarAlt className="mr-2 inline text-[#DFF500]" />
-              Friday, 30 October 2026
+              {currentDate}
             </p>
+
           </div>
 
+          {errors.length > 0 && (
+            <div className="mb-8 border border-red-500/20 bg-red-500/5 px-5 py-4">
+              {errors.map((error, index) => (
+                <p key={index} className="text-xs text-red-400">
+                  {error}
+                </p>
+              ))}
+            </div>
+          )}
+
           <section>
-            <div className="mb-6 flex items-center justify-between">
+
+            <div className="mb-7 flex items-center justify-between">
               <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-gray-400">
                 Platform Statistics
               </h2>
-              <span className="text-xs text-gray-600">Sample data</span>
+
+              <span className="text-xs text-gray-600">
+                Live data
+              </span>
             </div>
 
-            <div className="grid grid-cols-1 gap-7 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 xl:grid-cols-3">
+
               {stats.map((stat) => {
                 const Icon = stat.icon;
 
@@ -111,116 +199,125 @@ function AdminDashboard() {
                     key={stat.title}
                     className="border-b border-white/10 pb-6"
                   >
+
                     <div className="mb-5 flex items-center justify-between">
-                      <p className="text-sm text-gray-500">{stat.title}</p>
+                      <p className="text-sm text-gray-500">
+                        {stat.title}
+                      </p>
+
                       <Icon className="text-lg text-[#DFF500]" />
                     </div>
 
-                    <h3 className="text-4xl font-bold">{stat.value}</h3>
+                    <h3 className="text-4xl font-bold">
+                      {loading ? (
+                        <span className="text-2xl text-gray-600">...</span>
+                      ) : (
+                        stat.value
+                      )}
+                    </h3>
 
                     <p className="mt-3 text-xs text-gray-500">
-                      <FaArrowUp className="mr-1 inline text-[#DFF500]" />
-                      {stat.change}
+                      {stat.description}
                     </p>
+
                   </div>
                 );
               })}
+
             </div>
+
           </section>
 
-          <section className="mt-14 grid gap-12 xl:grid-cols-2">
-            <div>
-              <div className="mb-6 flex items-center justify-between">
-                <div>
-                  <h2 className="text-lg font-bold">Recent Members</h2>
-                  <p className="mt-1 text-xs text-gray-500">
-                    Recently registered members
-                  </p>
-                </div>
+          <section className="mt-16">
 
-                <FaUsers className="text-xl text-[#DFF500]" />
-              </div>
+            <div className="mb-7 flex items-center justify-between">
 
               <div>
-                {recentMembers.map((member, index) => (
+                <h2 className="text-lg font-bold">
+                  Recently Registered Users
+                </h2>
+
+                <p className="mt-1 text-xs text-gray-500">
+                  Latest members registered on E/FIT
+                </p>
+              </div>
+
+              <FaUsers className="text-xl text-[#DFF500]" />
+
+            </div>
+
+            {loading ? (
+              <p className="py-8 text-sm text-gray-500">
+                Loading users...
+              </p>
+            ) : recentUsers.length === 0 ? (
+              <p className="py-8 text-sm text-gray-500">
+                No registered users found.
+              </p>
+            ) : (
+
+              <div>
+
+                {recentUsers.map((user, index) => (
+
                   <div
-                    key={member.email}
-                    className="flex flex-col justify-between gap-2 border-b border-white/10 py-5 sm:flex-row sm:items-center"
+                    key={user._id}
+                    className="flex flex-col justify-between gap-3 border-b border-white/10 py-5 sm:flex-row sm:items-center"
                   >
-                    <div className="flex items-center gap-4">
+
+                    <div className="flex items-center gap-5">
+
                       <span className="text-xs text-gray-600">
-                        0{index + 1}
+                        {String(index + 1).padStart(2, "0")}
                       </span>
 
                       <div>
-                        <p className="text-sm font-semibold">{member.name}</p>
-                        <p className="mt-1 text-xs text-gray-500">
-                          {member.email}
-                        </p>
-                      </div>
-                    </div>
-
-                    <p className="text-xs text-gray-500">{member.date}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <div className="mb-6 flex items-center justify-between">
-                <div>
-                  <h2 className="text-lg font-bold">Training Schedules</h2>
-                  <p className="mt-1 text-xs text-gray-500">
-                    Today's scheduled sessions
-                  </p>
-                </div>
-
-                <FaClock className="text-xl text-[#DFF500]" />
-              </div>
-
-              <div>
-                {schedules.map((session) => (
-                  <div
-                    key={`${session.member}-${session.time}`}
-                    className="border-b border-white/10 py-5"
-                  >
-                    <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
-                      <div>
                         <p className="text-sm font-semibold">
-                          {session.workout}
+                          {user.username}
                         </p>
+
                         <p className="mt-1 text-xs text-gray-500">
-                          Member: {session.member}
-                        </p>
-                        <p className="mt-1 text-xs text-gray-500">
-                          Trainer: {session.trainer}
+                          {user.email}
                         </p>
                       </div>
 
-                      <p className="text-xs font-semibold text-[#DFF500]">
-                        {session.time}
-                      </p>
                     </div>
+
+                    <p className="text-xs text-gray-500">
+                      {formatDate(user)}
+                    </p>
+
                   </div>
+
                 ))}
+
               </div>
-            </div>
+
+            )}
+
           </section>
 
-          <section className="mt-14 border-t border-white/10 pt-8">
+          <section className="mt-16 border-t border-white/10 pt-9">
+
             <p className="text-xs tracking-[0.25em] text-gray-600">
               E/FIT ADMINISTRATION
             </p>
+
             <h2 className="mt-3 text-2xl font-bold">
               Manage. Monitor. Improve.
             </h2>
-            <p className="mt-2 max-w-xl text-sm leading-6 text-gray-500">
-              Manage registered users, trainers, fitness programs and training
-              activities from one central dashboard.
+
+            <p className="mt-3 max-w-xl text-sm leading-7 text-gray-500">
+              Manage registered users, organize workout programs and maintain
+              nutrition plans through one centralized administration panel.
             </p>
+
           </section>
+
         </main>
+
       </div>
+
     </div>
   );
 }
